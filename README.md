@@ -4,7 +4,7 @@
 
 ```
 # 克隆项目
-git clone https://github.com/biubiubiu01/vue3-bigData.git
+git clone https://github.com/Shaw007134/vue_data_gis.git
 # 进入项目目录
 cd vue3-bigData
 # 安装依赖

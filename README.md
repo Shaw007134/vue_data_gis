@@ -6,11 +6,11 @@
 # 克隆项目
 git clone https://github.com/Shaw007134/vue_data_gis.git
 # 进入项目目录
-cd vue3-bigData
+cd vue_data_gis
 # 安装依赖
-npm i
+yarn install
 # 本地开发 启动项目
-npm run serve
+yarn run serve
 ```
 
 
@@ -18,9 +18,9 @@ npm run serve
 
 ```
 # 打包项目
-npm run build
+yarn run build
 # 单元测试
-npm run test
+yarn run test
 ```
 
 

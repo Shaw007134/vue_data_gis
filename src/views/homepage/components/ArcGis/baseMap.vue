@@ -8,6 +8,7 @@
 import Map from '@arcgis/core/Map'
 import MapView from '@arcgis/core/views/MapView'
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer'
+import LayerList from '@arcgis/core/widgets/LayerList'
 
 import { computed, onMounted, reactive } from 'vue'
 
@@ -89,8 +90,8 @@ function handleMounted() {
       type: 'simple-fill',
       style: 'solid',
       outline: {
-        style: 'none',
-        width: '2px',
+        style: 'solid',
+        width: '1px',
       },
     },
   }
@@ -99,12 +100,13 @@ function handleMounted() {
     type: 'simple',
     field: 'Zone',
     symbol: {
-      color: [0, 225, 225, 0.2],
+      color: [0, 225, 225, 0],
       type: 'simple-fill',
       style: 'solid',
       outline: {
-        style: 'none',
+        style: 'solid',
         width: '2px',
+        color: '#63AFF8'
       },
     },
   }
@@ -138,6 +140,7 @@ function handleMounted() {
 
   const geojsonLayer_Zone = new GeoJSONLayer({
     url: url_Zone,
+    title: '分区',
     popupTemplate: template_Zone,
     renderer: renderer_Zone,
     opacity: 0.3,
@@ -145,13 +148,15 @@ function handleMounted() {
 
   const geojsonLayer_Watershed = new GeoJSONLayer({
     url: url_Watershed,
-    popupTemplate: template_Watershed,
+    title: '流域',
+    popupTemplate: null,
     renderer: renderer_Watershed,
     opacity: 0.9,
   })
 
   const geojsonLayer_Stream = new GeoJSONLayer({
     url: url_Stream,
+    title: '水系',
     popupTemplate: template_Stream,
     renderer: renderer_Stream,
     opacity: 0.9,
@@ -159,6 +164,7 @@ function handleMounted() {
 
   const geojsonLayer_outfall = new GeoJSONLayer({
     url: url_outfall,
+    title: '排口',
     popupTemplate: template_outfall,
     renderer: renderer_outfall,
     opacity: 0.9,
@@ -180,6 +186,13 @@ function handleMounted() {
     center: [117.36887, 31.87657],
     zoom: 13,
   })
+  let layerList = new LayerList({
+    view: view,
+  })
+  // Adds widget below other elements in the top left corner of the view
+  view.ui.add(layerList, {
+    position: 'top-right',
+  })
 
   view.popup.on('trigger-action', (event) => {
     // Execute the measureThis() function if the measure-this action is clicked
@@ -192,7 +205,7 @@ function handleMounted() {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .MapView {
   width: 100%;
   height: 80%;
@@ -204,5 +217,8 @@ function handleMounted() {
     height: 100%;
     width: 100%;
   }
+}
+.esri-component.esri-widget--panel {
+    width: 120px !important;
 }
 </style>

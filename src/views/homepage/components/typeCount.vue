@@ -45,8 +45,8 @@ export default {
     // //渲染echarts图
     const initEcharts = (data, sum) => {
       const colorList = [
+        '#808080',
         '#F0960E',
-        '#6255FE',
         '#34D160',
         '#00C6FF',
         '#F0960E',

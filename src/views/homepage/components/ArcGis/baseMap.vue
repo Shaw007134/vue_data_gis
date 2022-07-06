@@ -8,17 +8,19 @@
 import Map from '@arcgis/core/Map'
 import MapView from '@arcgis/core/views/MapView'
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer'
+import OpenStreetMapLayer from '@arcgis/core/layers/OpenStreetMapLayer'
 import LayerList from '@arcgis/core/widgets/LayerList'
 
-import { computed, onMounted, reactive } from 'vue'
+import { computed, ref, onMounted, reactive } from 'vue'
 
 export default {
   setup() {
     const state = reactive({
       name: 'arcgis',
     })
+    const tiandituTk = ref('1b4dea91685d42783d54d35e9990a3d2')
     onMounted(handleMounted)
-    return { state }
+    return { state, tiandituTk }
   },
 }
 
@@ -27,7 +29,7 @@ function handleMounted() {
   const url_Stream = '/region/stream.json'
   const url_Zone = '/region/zone.json'
   const url_outfall = '/region/outfall.json'
-
+  const tiandituTk = '1b4dea91685d42783d54d35e9990a3d2'
   var ZoneAction = {
     title: '点击查看详情',
     id: 'ZoneDetails',
@@ -106,7 +108,7 @@ function handleMounted() {
       outline: {
         style: 'solid',
         width: '2px',
-        color: '#63AFF8'
+        color: '#63AFF8',
       },
     },
   }
@@ -170,9 +172,14 @@ function handleMounted() {
     opacity: 0.9,
   })
 
+  const osmLayer = new OpenStreetMapLayer({
+    title: 'OSM',
+  })
+
   let map = new Map({
     basemap: 'hybrid', // streets，hybrid
     layers: [
+      osmLayer,
       geojsonLayer_outfall,
       geojsonLayer_Zone,
       geojsonLayer_Watershed,
@@ -193,7 +200,22 @@ function handleMounted() {
   view.ui.add(layerList, {
     position: 'top-right',
   })
-
+  view.on('pointer-move', function(event) {
+    view.hitTest(event).then(function(response) {
+      if (response.results.length) {
+        var graphic = response.results.filter(function(result) {
+          // check if the graphic belongs to the layer of interest
+          return result.graphic.layer === geojsonLayer_Zone
+        })[0].graphic
+        view.popup.open({
+          location: graphic.geometry.centroid,
+          features: [graphic],
+        })
+      } else {
+        view.popup.close()
+      }
+    })
+  })
   view.popup.on('trigger-action', (event) => {
     // Execute the measureThis() function if the measure-this action is clicked
     if (event.action.id === 'ZoneDetails') {
@@ -216,9 +238,10 @@ function handleMounted() {
     min-width: 400px;
     height: 100%;
     width: 100%;
+    -webkit-filter: grayscale(0.3) invert(1) !important;
   }
 }
 .esri-component.esri-widget--panel {
-    width: 120px !important;
+  width: 120px !important;
 }
 </style>

@@ -10,6 +10,8 @@ import MapView from '@arcgis/core/views/MapView'
 import GeoJSONLayer from '@arcgis/core/layers/GeoJSONLayer'
 import OpenStreetMapLayer from '@arcgis/core/layers/OpenStreetMapLayer'
 import LayerList from '@arcgis/core/widgets/LayerList'
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer'
+import GroupLayer from '@arcgis/core/layers/GroupLayer';
 
 import { computed, ref, onMounted, reactive } from 'vue'
 
@@ -169,13 +171,24 @@ function handleMounted() {
     title: '排口',
     popupTemplate: template_outfall,
     renderer: renderer_outfall,
+    outFields: ['*'],
     opacity: 0.9,
   })
 
   const osmLayer = new OpenStreetMapLayer({
     title: 'OSM',
   })
-
+  var resultsLayer = new GraphicsLayer({
+    // listMode: "hide",
+  })
+  var RegionGroupLayer = new GroupLayer({
+    title: '相关区域',
+    visible: true,
+    visibilityMode: 'independent',
+    listMode: 'hide',
+    layers: [resultsLayer],
+    opacity: 0.75,
+  })
   let map = new Map({
     basemap: 'hybrid', // streets，hybrid
     layers: [
@@ -184,6 +197,7 @@ function handleMounted() {
       geojsonLayer_Zone,
       geojsonLayer_Watershed,
       geojsonLayer_Stream,
+      RegionGroupLayer
     ],
   })
 
@@ -200,18 +214,54 @@ function handleMounted() {
   view.ui.add(layerList, {
     position: 'top-right',
   })
-  view.on('pointer-move', function(event) {
-    view.hitTest(event).then(function(response) {
+  var timer
+  var hovered = false
+  view.on('pointer-move', (event) => {
+    const point_opt = {
+      include: [geojsonLayer_outfall]
+    }
+    view.hitTest(event, point_opt).then((response) => {
       if (response.results.length) {
-        var graphic = response.results.filter(function(result) {
-          // check if the graphic belongs to the layer of interest
-          return result.graphic.layer === geojsonLayer_Zone
-        })[0].graphic
-        view.popup.open({
-          location: graphic.geometry.centroid,
-          features: [graphic],
-        })
+        // console.log(response.results)
+        if (hovered) return
+        hovered = true
+        timer = setTimeout(() => {
+          var graphic = response.results.filter((result) => {
+            // check if the graphic belongs to the layer of interest
+            return result.graphic.layer === geojsonLayer_outfall
+          })[0].graphic
+          var { Name } = graphic.attributes
+          // console.log(graphic, Name)
+          view.popup.open({
+            location: graphic.geometry.centroid,
+            features: [graphic],
+          })
+          const queryLayer = geojsonLayer_Watershed
+          const query = queryLayer.createQuery()
+          let sql = 'Outfall IN' + "('" + Name + "')"
+          query.where = sql
+          queryLayer.queryFeatures(query).then((results) => {
+            resultsLayer.removeAll()
+            var features = results.features.map((graphic) => {
+              graphic.symbol = {
+                type: 'simple-fill',
+                color: [0, 242, 39, 0.7],
+                outline: {
+                  width: 3,
+                  color: 'red',
+                },
+              }
+              return graphic
+            })
+            console.log(sql, features)
+            resultsLayer.addMany(features)
+            resultsLayer.visible = true
+          })
+        }, 1000)
       } else {
+        hovered = false
+        resultsLayer.removeAll()
+        clearTimeout(timer)
         view.popup.close()
       }
     })
@@ -238,7 +288,7 @@ function handleMounted() {
     min-width: 400px;
     height: 100%;
     width: 100%;
-    -webkit-filter: grayscale(0.3) invert(1) !important;
+    // -webkit-filter: grayscale(0.3) invert(1) !important;
   }
 }
 .esri-component.esri-widget--panel {

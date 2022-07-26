@@ -90,7 +90,7 @@ function handleMounted() {
     type: 'simple',
     field: 'Zone',
     symbol: {
-      color: '#FFFF00',
+      color: [0, 0, 128, 0.9],
       type: 'simple-fill',
       style: 'solid',
       outline: {
@@ -119,7 +119,7 @@ function handleMounted() {
     type: 'simple',
     symbol: {
       type: 'simple-fill',
-      color: [0, 225, 225, 0.9],
+      color: [255, 225, 0, 0.9],
       outline: {
         color: [255, 255, 0, 0.9],
         width: '1px',

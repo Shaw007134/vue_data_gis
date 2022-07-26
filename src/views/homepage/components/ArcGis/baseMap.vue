@@ -121,7 +121,7 @@ function handleMounted() {
       type: 'simple-fill',
       color: [0, 225, 225, 0.9],
       outline: {
-        color: [0, 225, 225, 0.9],
+        color: [255, 255, 0, 0.9],
         width: '1px',
       },
     },
@@ -262,7 +262,7 @@ function handleMounted() {
         hovered = false
         resultsLayer.removeAll()
         clearTimeout(timer)
-        view.popup.close()
+        // view.popup.close()
       }
     })
   })
@@ -288,7 +288,7 @@ function handleMounted() {
     min-width: 400px;
     height: 100%;
     width: 100%;
-    // -webkit-filter: grayscale(0.3) invert(1) !important;
+    -webkit-filter: grayscale(0.3) invert(1) !important;
   }
 }
 .esri-component.esri-widget--panel {
